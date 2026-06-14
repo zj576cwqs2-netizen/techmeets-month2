@@ -1,16 +1,58 @@
-// Create: 作成
-$Product = Product::create(['title' => '商品名', 'price' => 500]);
+<?php
 
-// Read: 取得
-$products =Product::where('description', '商品の説明文')->get();
-$Product = Product::where('stock', '>', 10)->first();
-$Product = Product::category()->where('name', 'カテゴリー名')->first();
+namespace App\Http\Controllers;
 
+use App\Models\Product;
+use Illuminate\Http\Request;
 
+class ProductController extends Controller
+{
+    // 一覧
+    public function index()
+    {
+        $products = Product::all();
+        return view('products.index', compact('products'));
+    }
 
-// Update: 更新
-$Product->update(['name' => '新しい商品名', 'price' => 1000]);
+    // 新規作成フォーム
+    public function create()
+    {
+        return view('products.create');
+    }
 
+    // 保存
+    public function store(Request $request)
+    {
+        Product::create($request->except('_token'));
+        return redirect('/products');
+    }
+    // 詳細
+    public function show(int $id)
+    {
+        $product = Product::findOrFail($id);
+        return view('products.show', compact('product'));
+    }
 
-// Delete: 削除
-$Product->delete();
+    // 編集フォーム
+    public function edit(int $id)
+    {
+        $product = Product::findOrFail($id);
+        return view('products.edit', compact('product'));
+    }
+
+    // 更新
+    public function update(Request $request, int $id)
+    {
+        $product = Product::findOrFail($id);
+        $product->update($request->except(['_token', '?_method']));
+        return redirect('/products');
+    }
+
+    // 削除
+    public function destroy(int $id)
+    {
+        $product = Product::findOrFail($id);
+        $product->delete();
+        return redirect('/products');
+    }
+}
