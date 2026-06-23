@@ -24,3 +24,11 @@ Route::post('/events/{event}/reservations', [ReservationController::class, 'stor
 
 Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
 Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    });
+
+    Route::resource('posts', 'App\\Http\\Controllers\\PostController');
+
+});

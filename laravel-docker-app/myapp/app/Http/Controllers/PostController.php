@@ -30,3 +30,22 @@ $post->update(Request $request, Post $post)
 
 Delete: 削除
 $post->delete();
+public function edit($id)
+{
+    $post = Post::findOrFail($id);
+
+    // 投稿の作者と現在のログインユーザーが異なる場合は403エラー
+    if ($post->user_id !== auth()->id()) {
+        abort(403, 'この操作は許可されていません');
+    }
+
+    return view('posts.edit', compact('post'));
+}
+session(['key] => 'value')
+$value = session('key');
+$value = session('デフォルト値');
+
+session()->flash('success', '保存しました');
+
+session()->forget('key');
+session()->flush();
