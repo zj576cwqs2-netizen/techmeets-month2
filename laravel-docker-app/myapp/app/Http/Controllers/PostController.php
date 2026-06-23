@@ -1,51 +1,71 @@
-//Create: 作成
-$post = Post::create(Request $request)
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Post;
+use Illuminate\Http\Request;
+
+class PostController extends Controller
 {
-    $validated = $request->validate([
-        'title'   => 'required|max:200',
-        'content' => 'required',
-    ]);
-
-    Post::create($validated);
-    return redirect()->route('posts.index');
-}
-
-//READ: 読み取り
-$posts = Post::all();
-$posts = Post::where('user_id', 1)->get();  // 条件付き
-$post  = Post::findOrFail(1);               // IDで1件（なければ404）
-$posts = Post::latest()->paginate(10);      // 新しい順・ページネーション
-
-//Update: 更新
-$post->update(Request $request, Post $post)
-{
-    $validated = $request->validate([
-        'title'   => 'required|max:200',
-        'content' => 'required',
-    ]);
-
-    $post->update($validated);
-    return redirect()->route('posts.index');
-}
-
-Delete: 削除
-$post->delete();
-public function edit($id)
-{
-    $post = Post::findOrFail($id);
-
-    // 投稿の作者と現在のログインユーザーが異なる場合は403エラー
-    if ($post->user_id !== auth()->id()) {
-        abort(403, 'この操作は許可されていません');
+    public function index()
+    {
+        $posts = Post::latest()->paginate(10);
+        return view('posts.index', compact('posts'));
     }
 
-    return view('posts.edit', compact('post'));
+    public function create()
+    {
+        return view('posts.create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'content' => 'required|max:1000',
+        ]);
+
+        Post::create([
+            'user_id' => auth()->id(),
+            'content' => $validated['content'],
+        ]);
+
+        return redirect()->route('posts.index');
+    }
+
+    public function show(Post $post)
+    {
+        return view('posts.show', compact('post'));
+    }
+
+    public function edit(Post $post)
+    {
+        if ($post->user_id !== auth()->user()->id)
+            abort(403, 'この操作は許可されていません');
+
+        return view('posts.edit', compact('post'));
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        if ($post->user_id !== auth()->id()) {
+            abort(403, 'この操作は許可されていません');
+        }
+
+        $validated = $request->validate([
+            'content' => 'required|max:1000',
+        ]);
+
+        $post->update($validated);
+        return redirect()->route('posts.index');
+    }
+
+    public function destroy(Post $post)
+    {
+        if ($post->user_id !== auth()->id()) {
+            abort(403, 'この操作は許可されていません');
+        }
+
+        $post->delete();
+        return redirect()->route('posts.index');
+    }
 }
-session(['key] => 'value')
-$value = session('key');
-$value = session('デフォルト値');
-
-session()->flash('success', '保存しました');
-
-session()->forget('key');
-session()->flush();

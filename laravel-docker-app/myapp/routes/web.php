@@ -7,6 +7,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ReservationController;
 
+require __DIR__.'/auth.php';
+
 // 基本的なルート（GETリクエストで / にアクセスしたら welcome ビューを返す）
 Route::get('/', function () {
     return view('welcome');
