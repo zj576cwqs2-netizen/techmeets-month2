@@ -3,69 +3,60 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Services\PostService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    public function index()
+    use AuthorizesRequests;
+
+    private PostService $postService;
+
+    public function __construct(PostService $postService)
     {
-        $posts = Post::latest()->paginate(10);
-        return view('posts.index', compact('posts'));
+        $this->postService = $postService;
     }
 
-    public function create()
+    public function index()
     {
-        return view('posts.create');
+        $posts = Post::where('published', true)->get();
+        return view('posts.index', compact('posts'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'content' => 'required|max:1000',
-        ]);
-
-        Post::create([
-            'user_id' => auth()->id(),
-            'content' => $validated['content'],
-        ]);
+        $post = Post::create($request->only('title', 'body'));
+        $post->tags()->sync($request->tags);
 
         return redirect()->route('posts.index');
-    }
-
-    public function show(Post $post)
-    {
-        return view('posts.show', compact('post'));
-    }
-
-    public function edit(Post $post)
-    {
-        if ($post->user_id !== auth()->user()->id)
-            abort(403, 'この操作は許可されていません');
-
-        return view('posts.edit', compact('post'));
     }
 
     public function update(Request $request, Post $post)
     {
-        if ($post->user_id !== auth()->id()) {
-            abort(403, 'この操作は許可されていません');
-        }
+        $this->authorize('update', $post);
 
         $validated = $request->validate([
-            'content' => 'required|max:1000',
+            'title' => 'required|string|max:255',
+            'body' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
         $post->update($validated);
-        return redirect()->route('posts.index');
+        $post->tags()->sync($request->tags ?? []);
+
+        return redirect()
+            ->route('posts.show', $post)
+            ->with('success', '投稿を更新しました');
     }
 
-    public function destroy(Post $post)
+    public function show(int $id)
     {
-        if ($post->user_id !== auth()->id()) {
-            abort(403, 'この操作は許可されていません');
-        }
+        $post = Post::findOrFail($id);
+        $tags = $post->tags; 
 
-        $post->delete();
-        return redirect()->route('posts.index');
+        return view('posts.show', compact('post', 'tags'));
     }
 }

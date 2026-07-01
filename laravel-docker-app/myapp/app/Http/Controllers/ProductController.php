@@ -20,27 +20,26 @@ class ProductController extends Controller
         return view('products.create');
     }
 
-    // 保存
+
     public function store(Request $request)
     {
         Product::create($request->except('_token'));
         return redirect('/products');
     }
-    // 詳細
+    
     public function show(int $id)
     {
         $product = Product::findOrFail($id);
         return view('products.show', compact('product'));
     }
 
-    // 編集フォーム
     public function edit(int $id)
     {
         $product = Product::findOrFail($id);
         return view('products.edit', compact('product'));
     }
 
-    // 更新
+    
     public function update(Request $request, int $id)
     {
         $product = Product::findOrFail($id);
