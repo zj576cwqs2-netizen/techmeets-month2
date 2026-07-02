@@ -18,38 +18,30 @@ class TaskController extends Controller
         private TaskRepository $taskRepository
     ){}
 
-    public function index()
-    {
-        $tasks = $this->taskRepository->getpublished();
-        return view('tasks_index', compact('tasks'));
-    }
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|max:200',
-            'content' => 'required',
-            'image' => 'nullable|image|max:2048',
-        ]);
+  public function create()
+{
+    return view('tasks_create');
+}
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'title' => 'required|max:200',
+        'description' => 'nullable',
+    ]);
+    $validated['user_id'] = Auth::id();
+    $task = $this->taskService->createTask($validated);
 
-        $validated['user_id'] = Auth::id();
-        $post = $this->taskService->createtask($validated);
-
-        Task::create($validated);
-        return redirect()
-            ->route('tasks.show', $post)
-            ->with('success', 'タスクを作成しました');
-    }
+    return redirect()
+        ->route('tasks.show', $task)
+        ->with('success', 'タスクを作成しました');
+}
 
     public function update(Request $request, int $id)
     {
-        $this->authorize('update', 'task');
-        
         $validated = $request->validate([
-            'title' => 'required|max:250',
-            'content' => 'required',
-            'image' => 'nullable|image|max:2048',
+            'title' => 'required|max:200',
+            'description' => 'nullable',
         ]);
-
         $post = $this->taskService->updateTask($id, $validated);
 
         return redirect()
@@ -57,10 +49,25 @@ class TaskController extends Controller
             ->with('success', 'タスクを更新しました');
     }
 
-    public function show(int $id)
-    {
-        $task = Task::findOrFail($id);
+    public function destroy(int $id)
+{
+    $this->taskRepository->delete(
+        $this->taskRepository->findById($id)
+    );
+    return redirect()
+        ->route('tasks.index')
+        ->with('success', 'タスクを削除しました');
+}
 
-        return view('tasks.show', compact('task'));
-    }
+public function index()
+{
+    $tasks = $this->taskRepository->getAll();
+    return view('tasks_index', compact('tasks'));
+}
+
+public function show(int $id)
+{
+    $task = $this->taskRepository->findById($id);
+    return view('tasks.show', compact('task'));
+}
 }
