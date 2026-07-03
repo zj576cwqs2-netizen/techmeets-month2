@@ -4,8 +4,7 @@ namespace App\Services;
 
 use App\Models\Task;
 use App\Repositories\TaskRepository;
-use Illuminate\Database\Eloquent\Collection;
-
+use Illuminate\Pagination\LengthAwarePaginator;
 class TaskService
 {
     public function __construct(
@@ -13,7 +12,7 @@ class TaskService
         private MailNotification $mailNotification
     ) {}
 
-    public function getAllTasks(): Collection
+    public function getAllTasks(): \Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->taskRepository->getAll();
     }

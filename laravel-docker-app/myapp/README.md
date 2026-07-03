@@ -57,3 +57,109 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## リファクタリング: Fat Controller の解消
+
+### 対象
+- `app/Http/Controllers/PostController.php`
+- `app/Http/Controllers/TaskController.php`
+
+### 問題点(Before)
+
+両コントローラーとも、Service/Repository層がすでに用意されているにもかかわらず、コントローラーが以下のような責務を直接抱え込んでいた:
+
+- Eloquentモデル(`Post`, `Task`)への直接アクセス
+- バリデーション後のデータ加工(タグ同期処理など)
+- ビジネスロジックとデータアクセスの混在
+
+#### Before: PostController@index
+```php
+public function index()
+{
+    $posts = Post::latest()->paginate(10);
+    return view('posts.index', compact('posts'));
+}
+```
+
+#### Before: PostController@store
+```php
+public function store(Request $request)
+{
+    $post = Post::create($request->only('title', 'body'));
+    $post->tags()->sync($request->tags);
+    return redirect()->route('posts.index');
+}
+```
+
+#### Before: TaskController(層の使い方が不統一)
+`create()` / `index()` / `show()` / `destroy()` は `TaskRepository` を直接呼び出す一方、`store()` / `update()` は `TaskService` 経由と、アクセス経路が混在していた。
+
+```php
+public function __construct(
+    private TaskService $taskService,
+    private TaskRepository $taskRepository
+){}
+
+public function index()
+{
+    $tasks = $this->taskRepository->getAll(); // Repositoryを直接呼び出し
+    return view('tasks_index', compact('tasks'));
+}
+```
+
+### 改善後(After)
+
+コントローラーは **Service層のみに依存**し、モデル操作・データ加工はすべてServiceとRepositoryに委譲する構成に統一した。
+
+#### After: PostController@index
+```php
+public function index()
+{
+    $posts = $this->postService->getAllPosts();
+    return view('posts.index', compact('posts'));
+}
+```
+
+#### After: PostController@store
+```php
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'body' => 'required|string',
+    ]);
+
+    $post = $this->postService->createPost($validated);
+    $this->postService->syncTags($post, $request->tags ?? []);
+
+    return redirect()->route('posts.index');
+}
+```
+
+#### After: TaskController(依存をServiceのみに統一)
+```php
+public function __construct(
+    private TaskService $taskService
+){}
+
+public function index()
+{
+    $tasks = $this->taskService->getAllTasks(); // Service経由に統一
+    return view('tasks_index', compact('tasks'));
+}
+```
+
+### 主な変更点
+
+| 項目 | Before | After |
+|---|---|---|
+| モデルへの直接アクセス | Controller内で `Post::create()` 等を直接呼び出し | Service経由(`postService->createPost()`)に統一 |
+| 依存関係 | `TaskController` が `TaskService` と `TaskRepository` の両方に依存 | `TaskService` のみに依存(単一責任の原則) |
+| タグ同期処理 | Controller内に直書き | `PostService::syncTags()` に切り出し |
+| バリデーション | 一部項目(`user_id`)をクライアントから受け取れる不備あり | サーバー側で `Auth::id()` から自動設定するよう修正 |
+
+### 得られた効果
+
+- **テスト容易性の向上**: Controllerがモデルに依存しなくなったため、Serviceをモックしたユニットテストが書きやすくなった
+- **責務の明確化**: Controller = リクエスト処理とレスポンス返却、Service = ビジネスロジック、Repository = データアクセス、という役割分担が徹底された
+- **不整合の解消**: `TaskController` 内で発生していた「一部はRepository直接、一部はService経由」という一貫性のない依存関係を解消

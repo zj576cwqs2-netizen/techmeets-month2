@@ -67,4 +67,24 @@ class PostService
     {
         Mail::to($post->user)->send(new PostCreated());
     }
+public function getAllPosts()
+{
+    return $this->postRepository->getAll();
+}
+
+public function getPostById(int $id)
+{
+    return $this->postRepository->findById($id);
+}
+
+public function deletePost(int $id): void
+{
+    $post = $this->postRepository->findById($id);
+    $this->postRepository->delete($post);
+}
+
+public function syncTags(\App\Models\Post $post, array $tagIds): void
+{
+    $post->tags()->sync($tagIds);
+}
 }
