@@ -41,4 +41,8 @@ Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.de
 Route::get('/dashboard', function () {
     return view('posts.dashboard');
 });
+
+Route::get('/vue-test', function () {
+    return view('vue-test');
+});
 });
