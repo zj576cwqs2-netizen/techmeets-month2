@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Purchase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Webhook;
@@ -43,6 +44,17 @@ class StripeWebhookController extends Controller
                     'amount'             => $paymentIntent->amount,
                     'currency'           => $paymentIntent->currency,
                 ]);
+
+                // 購入履歴をDBに保存(同じpayment_intent_idが来ても重複登録しない)
+                Purchase::firstOrCreate(
+                    ['payment_intent_id' => $paymentIntent->id],
+                    [
+                        'amount'   => $paymentIntent->amount,
+                        'currency' => $paymentIntent->currency,
+                        'status'   => 'succeeded',
+                    ]
+                );
+
                 break;
 
             default:
