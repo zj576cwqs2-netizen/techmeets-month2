@@ -1,3 +1,4 @@
+nano README.md
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
@@ -72,3 +73,11 @@ SSHの22番ポートは、最初はこのポートがブロックされていた
 | 80 | TCP (HTTP) | 0.0.0.0/0 | Webアプリの公開 | LaravelアプリケーションをNginx経由でブラウザから閲覧できるようにするため。画像アップロード機能の動作確認に必要。 |
 
 ※ 送信元を `0.0.0.0/0`（全世界）にしているのは学習・検証環境のためであり、本番運用する場合は自宅・オフィスのIPアドレスや踏み台サーバー経由に制限するべきである。
+dig yhius.net　+shortを実行→EC2コンソールのElastic IPアドレスである172.66.147.243、104.20.23.154が返ってきた。
+sudo certbot certificates:証明書有効期限が11月7日であること、期限が近づくと自動更新されるように設定されている
+curl -I https://yhius.net:　
+laravelが正常に動作している証拠
+XSRF-TOKEN　Laravelが発行する、CSRF対策用トークンです。フォーム送信時などに検証するために使われます。
+
+2. laravel-session
+ユーザーのセッション情報です。JavaScriptからは読み取れないようになっており、セキュリティ的に適切な設定です。
