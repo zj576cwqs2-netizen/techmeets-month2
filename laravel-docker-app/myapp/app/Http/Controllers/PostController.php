@@ -23,13 +23,17 @@ class PostController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'body' => 'required|string',
+            'content' => 'required|string',
         ]);
+
+        $validated['user_id'] = auth()->user()->id;
 
         $post = $this->postService->createPost($validated);
         $this->postService->syncTags($post, $request->tags ?? []);
 
-        return redirect()->route('posts.index');
+        return redirect()
+            ->route('posts.show', $post->id)
+            ->with('success', '投稿を更新しました');
     }
 
     public function update(Request $request, int $id)
@@ -39,7 +43,7 @@ class PostController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'body' => 'required|string',
+            'content' => 'required|string',
             'price' => 'nullable|numeric|min:0',
         ]);
 
@@ -49,12 +53,40 @@ class PostController extends Controller
         return redirect()
             ->route('posts.show', $updated)
             ->with('success', '投稿を更新しました');
+            
     }
 
     public function show(int $id)
     {
         $post = $this->postService->getPostById($id);
-        return view('posts.show', ['post' => $post, 'tags' => $post->tags]);
+        return view('posts.show', [
+            'post' => $post,
+            'tags' => $post->tags,
+            'comments' => $post->comments,
+        ]);
     }
+
+    public function create()
+    {
+        return view('posts.create');
+    }
+
+    public function edit(int $id)
+    {
+        $post = $this->postService->getPostById($id);
+        $this->authorize('update', $post);
+        return view('posts.edit', ['post' => $post]);
+    }
+
+    public function destroy(int $id)
+    {
+        $post = $this->postService->getPostById($id);
+        $this->authorize('delete', $post);
+        $this->postService->deletePost($id);
+
+        return redirect()->route('posts.index')->with('success', '投稿を削除しました');
+    }
+
+
 }
    

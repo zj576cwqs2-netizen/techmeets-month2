@@ -15,13 +15,7 @@ class TaskRepository
         return Task::findOrFail($id);
     }
 
-    public function getPUblished()
-    {
-        return Task::where('status', 'published')
-            ->latest()
-            ->paginate(10);
-    }
-
+  
     public function create(array $data)
     {
         return Task::create($data);

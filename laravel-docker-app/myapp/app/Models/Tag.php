@@ -1,23 +1,12 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+
 class Tag extends Model
 {
-    public function user()
+    public function posts()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(Post::class);
     }
-
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class);
-    }
-
-    // app/Models/Tag.php
-public function posts()
-{
-    return $this->belongsToMany(Post::class);
-}
 }

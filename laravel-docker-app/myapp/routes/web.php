@@ -6,6 +6,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\CommentController;
 
 require __DIR__.'/auth.php';
 
@@ -25,9 +26,9 @@ Route::post('/events/{event}/reservations', [ReservationController::class, 'stor
 Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
 Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    });
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index']);
+Route::post('/posts/{post}/comments', [CommentController::class, 'store']);
+    Route::resource('posts', 'App\\Http\\Controllers\\PostController');
 
     Route::resource('posts', 'App\\Http\\Controllers\\PostController');
 
@@ -37,10 +38,6 @@ Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
 Route::get('/tasks/{id}', [TaskController::class, 'show'])->name('tasks.show');
 Route::put('/tasks/{id}', [TaskController::class, 'update'])->name('tasks.update');
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
-
-Route::get('/dashboard', function () {
-    return view('posts.dashboard');
-});
 
 Route::get('/vue-test', function () {
     return view('vue-test');

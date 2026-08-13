@@ -3,32 +3,35 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Tag;
 use App\Models\User;
 
 class Post extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'content',
         'user_id',
     ];
-protected $casts = [
+    protected $casts = [
     'created_at' => 'datetime',
+    ];
 
-];
-
-//belongsTo:　投稿(多) →　ユーザー(1)
-public function user()
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+public function tags()
 {
-    return $this->belongsTo(User::class);
+    return $this->belongsToMany(Tag::class);
+
 }
-// PostController.php
-public function show(int $id)
-{
-    $post = Post::find($id);
-    $tags = $post->tags; // タグ一覧を取得
 
-    return view('posts.show', compact('post', 'tags'));
+public function comments()
+{
+    return $this->hasMany(Comment::class);
 }
 }

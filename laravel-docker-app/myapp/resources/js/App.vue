@@ -4,7 +4,11 @@
     <ItemForm @create="createItem" />
 
     <h2>商品一覧</h2>
-    <ItemList :items="items" :loading="loading" :error="error" />
+    <ItemList
+      :items="items"
+      :loading="loading"
+      :error="error"
+    />
   </div>
 </template>
 

@@ -1,7 +1,11 @@
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware('auth');
-Route::middleware('auth')->group(function () {
-    Route::get('/posts/create', [PostController::class, 'create']);
-    Route::post('/posts', [PostController::class, 'store']);
-    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
-});
+<?php
+
+namespace App\Http\Controllers;
+
+class DashboardController extends Controller
+{
+    public function index()
+    {
+        return view('posts.dashboard');
+    }
+}

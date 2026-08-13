@@ -1,8 +1,19 @@
-<<template>
+<template>
   <form @submit.prevent="submit">
-    <input v-model="form.name" placeholder="商品名" required />
-    <input v-model.number="form.price" type="number" placeholder="価格" required />
-    <button type="submit">登録する</button>
+    <input
+      v-model="form.name"
+      placeholder="商品名"
+      required
+    >
+    <input
+      v-model.number="form.price"
+      type="number"
+      placeholder="価格"
+      required
+    >
+    <button type="submit">
+      登録する
+    </button>
   </form>
 </template>
 

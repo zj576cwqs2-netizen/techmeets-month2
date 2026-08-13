@@ -1,9 +1,17 @@
 <template>
   <div>
-    <p v-if="loading">読み込み中...</p>
-    <p v-else-if="error">エラーが発生しました</p>
+    <p v-if="loading">
+      読み込み中...
+    </p>
+    <p v-else-if="error">
+      エラーが発生しました
+    </p>
     <ul v-else>
-      <ItemCard v-for="item in items" :key="item.id" :item="item" />
+      <ItemCard
+        v-for="item in items"
+        :key="item.id"
+        :item="item"
+      />
     </ul>
   </div>
 </template>
