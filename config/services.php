@@ -40,8 +40,4 @@ return [
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
-
-    'sendgrid' => [
-        'api_key' => env('SENDGRID_API_KEY'),
-    ],
 ];

@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
@@ -42,4 +41,16 @@ Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.de
 Route::get('/vue-test', function () {
     return view('vue-test');
 });
-});
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+
+Route::get('/checkout', [StripeCheckoutController::class, 'create'])->name('checkout.create');
+Route::get('/checkout/success', function () {
+    return view('checkout.success');
+})->name('checkout.success');
+Route::get('/checkout/cancel', function () {
+    return view('checkout.cancel');
+})->name('checkout.cancel');
+
+Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store'])->name('register.store');
