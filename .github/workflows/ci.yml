@@ -27,8 +27,8 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-          -name; テスト実行
-          run: php artisan test
-          
+      - name: テスト実行
+        run: php artisan test
+
 
 
