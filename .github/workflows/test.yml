@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    
     services:
       mysql:
         image: mysql:8.0
@@ -15,24 +15,24 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
+    
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mbstring, xml, ctype, json, pdo, mysql
-
+      
       - name: Install dependencies
         run: composer install
-
+      
       - name: Copy .env
         run: |
           cp .env.example .env
           php artisan key:generate
-
+      
       - name: Run migrations
         env:
           DB_CONNECTION: mysql
@@ -42,7 +42,7 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: password
         run: php artisan migrate
-
+      
       - name: Run tests
         env:
           DB_CONNECTION: mysql
