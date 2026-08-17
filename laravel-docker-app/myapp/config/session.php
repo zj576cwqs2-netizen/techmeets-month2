@@ -215,3 +215,15 @@ return [
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
 ];
+session(['key' => 'value']);
+
+
+$value = session('key');
+$value = session('key', 'デフォルト値');  // 第2引数はキーが存在しない場合のデフォルト値
+
+
+session()->flash('success', '保存しました');
+
+session()->forget('key');
+
+session()->flush();

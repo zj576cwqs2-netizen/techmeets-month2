@@ -1,0 +1,10 @@
+<template>
+  <div class="card">
+    <h3>{{ item.name }}</h3>
+    <p>¥{{ item.price }}</p>
+  </div>
+</template>
+
+<script setup>
+const props = defineProps({ item: Object })
+</script>

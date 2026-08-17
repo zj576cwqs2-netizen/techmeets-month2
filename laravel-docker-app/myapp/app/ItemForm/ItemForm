@@ -1,0 +1,35 @@
+<template>
+  <form @submit.prevent="createItem">
+    <input v-model="form.name" placeholder="商品名" required />
+    <input v-model.number="form.price" type="number" placeholder="価格" required />
+    <button type="submit">登録する</button>
+  </form>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+const emit = defineEmits(['created'])
+
+const form = ref({ name: '', price: 0 })
+
+async function createItem() {
+  try {
+    const response = await fetch('/api/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form.value),
+    })
+
+    const data = await response.json()
+    // emit created event with returned item data
+    emit('created', data?.data ?? data)
+
+    // reset form
+    form.value.name = ''
+    form.value.price = 0
+  } catch (e) {
+    // handle error (silent for now)
+    console.error(e)
+  }
+}
+</script>
