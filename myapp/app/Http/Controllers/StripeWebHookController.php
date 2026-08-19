@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Stripe\Webhook;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\Webhook;
 use UnexpectedValueException;
 
 class StripeWebhookController extends Controller

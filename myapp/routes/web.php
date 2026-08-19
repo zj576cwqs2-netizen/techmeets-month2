@@ -20,8 +20,8 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     });
 });
-Route::get('/check-file', fn() => 'このファイルが読み込まれています');
-Route::get('/check-file', fn() => 'このファイルが読み込まれています');
+Route::get('/check-file', fn () => 'このファイルが読み込まれています');
+Route::get('/check-file', fn () => 'このファイルが読み込まれています');
 
 use App\Http\Controllers\StripeWebhookController;
 

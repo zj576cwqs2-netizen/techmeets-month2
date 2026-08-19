@@ -13,7 +13,9 @@ use Illuminate\Notifications\Notifiable;
 class User extends Model implements AuthenticatableContract
 {
     /** @use HasFactory<UserFactory> */
-    use AuthenticatableTrait, HasFactory, Notifiable;
+    use AuthenticatableTrait;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
