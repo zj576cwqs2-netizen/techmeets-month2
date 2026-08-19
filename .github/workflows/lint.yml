@@ -41,7 +41,3 @@ jobs:
             - name: Run PHPStan
               run: vendor/bin/phpstan analyse --memory-limit=1G
 
-
-
-
-  
