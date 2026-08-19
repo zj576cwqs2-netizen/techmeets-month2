@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\WelcomeMail;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -35,7 +34,10 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
         Auth::login($user);
 
-        Mail::to($user->email)->send(new WelcomeMail($user->name));
+        Mail::raw("Welcome, {$user->name}!", function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Welcome');
+        });
 
         return redirect('/dashboard');
     }

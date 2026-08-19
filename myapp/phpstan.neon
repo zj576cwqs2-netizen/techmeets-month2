@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+    excludePaths:
+        - app/Providers
+    ignoreErrors:
+        -
+            message: '#Access to an undefined property Stripe\\StripeObject::\$#'
+            path: app/Http/Controllers/StripeWebHookController.php
+        -
+            message: '#Access to an undefined property App\\Http\\Resources\\ItemResource::\$#'
+            path: app/Http/Resources/ItemResource.php

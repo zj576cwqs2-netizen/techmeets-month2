@@ -1,0 +1,33 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+
+  e2e-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm run e2e
+      - name: 開発サーバーをバックグラウンドで起動
+        run: npm run dev &
+      - name: サーバーの起動を待機
+        run: npx wait-on localhost:8000 --timeout 30000
+      - name: Cypressを実行(ヘッドレスモード)
+        run: npx cypress run
+
