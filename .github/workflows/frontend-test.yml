@@ -36,11 +36,22 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
-      - name: Install npm dependencies
-        run: npm ci
-      - name: Build frontend asset
-        run: npm run build
-      - name: laravelサーバーをバックグラウンドで起動
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, json, pdo, mysql
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Copy .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run migrations
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
@@ -48,10 +59,34 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: password
-        run: php artisan serve --host=0.0.0.0 --port=8000 &
-        
+        run: php artisan migrate --force
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Laravelサーバーをバックグラウンドで起動
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: password
+        run: nohup php artisan serve --host=0.0.0.0 --port=8000 > server.log 2>&1 &
+
       - name: サーバーの起動を待機
         run: npx wait-on http://localhost:8000 --timeout 30000
 
       - name: Cypressを実行(ヘッドレスモード)
         run: npx cypress run
+
+      - name: サーバーログを表示(デバッグ用)
+        if: failure()
+        run: cat server.log
