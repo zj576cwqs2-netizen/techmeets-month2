@@ -21,15 +21,37 @@ jobs:
 
   e2e-test:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - name: 開発サーバーをバックグラウンドで起動
-        run: npm run dev &
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Build frontend asset
+        run: npm run build
+      - name: laravelサーバーをバックグラウンドで起動
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: password
+        run: php artisan serve --host=0.0.0.0 --port=8000 &
+        
       - name: サーバーの起動を待機
         run: npx wait-on http://localhost:8000 --timeout 30000
+
       - name: Cypressを実行(ヘッドレスモード)
         run: npx cypress run
