@@ -1,0 +1,31 @@
+name: Deploy to Staging
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: チェックアウト
+        uses: actions/checkout@v4
+
+      - name: サーバーにSSH接続してステージングにデプロイ
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/techmeets-month2
+            git fetch origin
+            git checkout -- .
+            git checkout develop
+            git reset --hard origin/develop
+            cd myapp
+            docker compose -f docker-compose.staging.yml build app-staging
+            docker compose -f docker-compose.staging.yml up -d
+            docker compose -f docker-compose.staging.yml exec -T app-staging composer install --optimize-autoloader
+            docker compose -f docker-compose.staging.yml exec -T app-staging php artisan migrate --force
+            docker compose -f docker-compose.staging.yml exec -T app-staging php artisan config:cache
