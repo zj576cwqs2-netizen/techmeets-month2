@@ -1,0 +1,60 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: PHPをセットアップ
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Node.jsをセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Composer依存パッケージをインストール
+        run: composer install --no-interaction --prefer-dist
+
+      - name: npm依存パッケージをインストール
+        run: npm ci
+
+      - name: .envファイルを準備
+        run: cp .env.example .env
+
+      - name: アプリケーションキーを生成
+        run: php artisan key:generate
+
+      - name: SQLiteのDBファイルを作成
+        run: touch database/database.sqlite
+
+      - name: データベースをマイグレーション
+        run: php artisan migrate --force
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+
+      - name: Vitestを実行
+        run: npm test
+
+      - name: Laravelサーバーをバックグラウンドで起動
+        run: php artisan serve --port=8000 &
+
+      - name: Viteサーバーの起動を待ってCypressを実行
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run dev
+          wait-on: 'http://localhost:5173'
+          wait-on-timeout: 60
+          browser: chrome
