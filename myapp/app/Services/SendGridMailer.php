@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use SendGrid\Mail\Mail;
-use SendGrid;
 use Illuminate\Support\Facades\Log;
+use SendGrid;
+use SendGrid\Mail\Mail;
 
 class SendGridMailer
 {

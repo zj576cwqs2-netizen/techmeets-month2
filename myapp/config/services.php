@@ -34,7 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    
+
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
@@ -45,5 +45,5 @@ return [
         'api_key' => env('SENDGRID_API_KEY'),
     ],
 
-    
+
 ];
