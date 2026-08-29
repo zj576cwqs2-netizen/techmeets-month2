@@ -10,7 +10,7 @@ parameters:
     ignoreErrors:
         -
             message: '#Access to an undefined property Stripe\\StripeObject::\$#'
-            path: app/Http/Controllers/StripeWebHookController.php
+            path: app/Http/Controllers/StripeWebhookController.php
         -
             message: '#Access to an undefined property App\\Http\\Resources\\ItemResource::\$#'
             path: app/Http/Resources/ItemResource.php

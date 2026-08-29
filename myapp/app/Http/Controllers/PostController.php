@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\ImageManager;
 
 class PostController extends Controller
@@ -27,36 +28,28 @@ class PostController extends Controller
     }
 
     public function store(Request $request)
-    {
-        // WebPに変換
-        $manager = new ImageManager(new Driver());
-        $file = $request->file('image');
+{
+    $manager = new ImageManager(new Driver());
+    $image = $manager->decode($request->file('image')->getRealPath())
+        ->encode(new WebpEncoder(quality: 80));
 
-        if (method_exists($manager, 'read')) {
-            $image = $manager->read($file->getRealPath())->toWebp(80);
-        } elseif (method_exists($manager, 'make')) {
-            $image = $manager->make($file->getRealPath())->encode('webp', 80);
-        } else {
-            throw new \RuntimeException('Image library does not support WebP conversion.');
-        }
+    $filename = 'images/' . uniqid() . '.webp';
 
-        $filename = 'images/' . uniqid() . '.webp';
+    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+    $disk = Storage::disk('s3');
+    $disk->put($filename, (string) $image);
 
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('s3');
-        $disk->put($filename, (string) $image);
+    $url = $disk->url($filename);
 
-        $url = $disk->url($filename);
+    $post = new Post();
+    $post->title = $request->title;
+    $post->body = $request->body;
+    $post->image_url = $url;
+    $post->user_id = Auth::id();
+    $post->save();
 
-        $post = new Post();
-        $post->title = $request->title;
-        $post->body = $request->body;
-        $post->image_url = $url;
-        $post->user_id = Auth::id();
-        $post->save();
+    Cache::forget('posts.index');
 
-        Cache::forget('posts.index');
-
-        return redirect('/posts');
-    }
+    return redirect('/posts');
+}
 }
