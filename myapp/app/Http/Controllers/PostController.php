@@ -29,9 +29,16 @@ class PostController extends Controller
     public function store(Request $request)
     {
         // WebPに変換
-        $uploadedImage = $request->file('image');
         $manager = new ImageManager(new Driver());
-        $image = $manager->read($uploadedImage->getRealPath())->toWebp(80);
+        $file = $request->file('image');
+
+        if (method_exists($manager, 'read')) {
+            $image = $manager->read($file->getRealPath())->toWebp(80);
+        } elseif (method_exists($manager, 'make')) {
+            $image = $manager->make($file->getRealPath())->encode('webp', 80);
+        } else {
+            throw new \RuntimeException('Image library does not support WebP conversion.');
+        }
 
         $filename = 'images/' . uniqid() . '.webp';
 
