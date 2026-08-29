@@ -28,28 +28,28 @@ class PostController extends Controller
     }
 
     public function store(Request $request)
-{
-    $manager = new ImageManager(new Driver());
-    $image = $manager->decode($request->file('image')->getRealPath())
-        ->encode(new WebpEncoder(quality: 80));
+    {
+        $manager = new ImageManager(new Driver());
+        $image = $manager->decode($request->file('image')->getRealPath())
+            ->encode(new WebpEncoder(quality: 80));
 
-    $filename = 'images/' . uniqid() . '.webp';
+        $filename = 'images/' . uniqid() . '.webp';
 
-    /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-    $disk = Storage::disk('s3');
-    $disk->put($filename, (string) $image);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('s3');
+        $disk->put($filename, (string) $image);
 
-    $url = $disk->url($filename);
+        $url = $disk->url($filename);
 
-    $post = new Post();
-    $post->title = $request->title;
-    $post->body = $request->body;
-    $post->image_url = $url;
-    $post->user_id = Auth::id();
-    $post->save();
+        $post = new Post();
+        $post->title = $request->title;
+        $post->body = $request->body;
+        $post->image_url = $url;
+        $post->user_id = Auth::id();
+        $post->save();
 
-    Cache::forget('posts.index');
+        Cache::forget('posts.index');
 
-    return redirect('/posts');
-}
+        return redirect('/posts');
+    }
 }
