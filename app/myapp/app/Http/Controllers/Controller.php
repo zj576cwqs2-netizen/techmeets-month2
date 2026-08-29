@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
 use Illuminate\Database\Eloquent\Model;
 
-
-class Controller
+abstract class Controller
 {
     // ファイルをS3にアップロードして公開URLを取得し、モデルに保存する
     protected function uploadImageToS3(Request $request, Model $item)
